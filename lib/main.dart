@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yousync/page/home/home.dart';
+import 'package:yousync/page/start/start.dart';
+import 'package:yousync/service/client.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
           elevation: 1
         )
       ),
-      home: HomePage(),
+      home: StartPage(),
     );
   }
 }
