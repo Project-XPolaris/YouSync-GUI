@@ -6,7 +6,25 @@ import 'package:fixnum/fixnum.dart' as fixnum;
 import 'package:grpc/grpc.dart';
 import 'package:yousync/rpc/service.pbgrpc.dart';
 import 'package:path/path.dart' as p;
+import 'dart:io' as io;
+
 SyncClient DefaultSyncClient = new SyncClient();
+
+class SyncFileStatus {
+  final String path;
+  final int chunk;
+  final int totalChunk;
+
+  SyncFileStatus(
+      {required this.path, required this.chunk, required this.totalChunk});
+}
+
+class SyncFolderStatus {
+  SyncFileStatus file;
+
+  SyncFolderStatus(this.file);
+}
+
 class SyncClient {
   int maxChunkSize = 1000 * 1000;
   ClientChannel? channel;
@@ -23,18 +41,24 @@ class SyncClient {
     this.stub = clientStub;
   }
 
-  Future<void> syncFolder(String dirPath,int remoteFolderId) async {
+  Future<void> syncFolder(String dirPath, int remoteFolderId,
+      {Function(SyncFolderStatus)? onRefresh}) async {
     Directory dir = new Directory(dirPath);
     await for (var item in dir.list(recursive: true)) {
       var stat = await item.stat();
       if (stat.type == FileSystemEntityType.directory) {
         continue;
       }
-      await syncFile(item.path,dirPath,remoteFolderId);
+      await syncFile(item.path, dirPath, remoteFolderId, (status) {
+        if (onRefresh != null) {
+          onRefresh(SyncFolderStatus(status));
+        }
+      });
     }
   }
 
-  Future<void> syncFile(String filePath, String rootPath,int remoteFolderId) async {
+  Future<void> syncFile(String filePath, String rootPath, int remoteFolderId,
+      Function(SyncFileStatus) onRefresh) async {
     var instance = stub;
     if (instance == null) {
       return;
@@ -45,6 +69,8 @@ class SyncClient {
     int chunkCount = (length / maxChunkSize).ceil();
     RandomAccessFile raf = file.openSync(mode: FileMode.read);
     for (int idx = 0; idx < chunkCount; idx++) {
+      onRefresh(
+          SyncFileStatus(path: filePath, chunk: idx, totalChunk: chunkCount));
       raf.setPositionSync(idx * maxChunkSize);
       Uint8List data = raf.readSync(maxChunkSize);
       Digest sha256Result = sha256.convert(data);
@@ -74,6 +100,96 @@ class SyncClient {
     var instance = stub;
     if (instance == null) {
       return;
+    }
+  }
+  Future<List<RemoteFiles>> getRemoteFileList(int folderId) async {
+    var instance = stub;
+    if (instance == null) {
+      return [];
+    }
+    var result =  await instance.readFolderFiles(RemoteFilesMessage(
+      folderId: fixnum.Int64.parseInt(folderId.toString()),
+    ));
+    return result.files;
+  }
+  Future<RemoteChunkInfo> getRemoteChunkInfo(RemoteFiles remoteFiles,int size,int offset) async {
+    var instance = stub;
+    if (instance == null) {
+      throw Exception("client not connect");
+    }
+    return await instance.getRemoteFileChunkInfo(GetRemoteChunkInfoMessage(
+      folderId: remoteFiles.folderId,
+      offset: fixnum.Int64.parseInt(offset.toString()),
+      size: fixnum.Int64.parseInt(size.toString()),
+      path: remoteFiles.path
+    ));
+  }
+  Future<RemoteChunk> getRemoteChunk(RemoteFiles remoteFiles,int size,int offset) async {
+    var instance = stub;
+    if (instance == null) {
+      throw Exception("client not connect");
+    }
+    return await instance.getRemoteFileChunk(GetRemoteChunkMessage(
+        folderId: remoteFiles.folderId,
+        offset: fixnum.Int64.parseInt(offset.toString()),
+        size: fixnum.Int64.parseInt(size.toString()),
+        path: remoteFiles.path
+    ));
+  }
+  Future pull(String pullPath,int folderId) async {
+    var instance = stub;
+    if (instance == null) {
+      throw Exception("client not connect");
+    }
+    var result = await getRemoteFileList(folderId);
+    var maxSyncSize = 1024 * 1024;
+    for (int idx = 0; idx < result.length; idx++) {
+      var remoteFile = result[idx];
+      String filePath = p.join(pullPath, remoteFile.path);
+      String fileDir = p.dirname(filePath);
+      new Directory(fileDir).createSync(recursive: true);
+      var fileExist = io.File(filePath).existsSync();
+      File file = new File(filePath);
+      if (!fileExist) {
+        RandomAccessFile raf = file.openSync(mode: FileMode.writeOnlyAppend);
+        bool isEnd = false;
+        int offset = 0;
+        while (!isEnd) {
+          var info = await getRemoteChunkInfo(
+              result[idx], maxSyncSize, offset);
+          var chunk =
+          await getRemoteChunk(result[idx], maxSyncSize, offset);
+          raf.writeFromSync(chunk.data);
+          offset += maxSyncSize;
+          isEnd = info.lastChunk;
+        }
+        raf.closeSync();
+        continue;
+      }
+      // sync with chunk
+      bool isEnd = false;
+      int offset = 0;
+      while (!isEnd) {
+        RandomAccessFile raf = file.openSync(mode: FileMode.read);
+        var info = await getRemoteChunkInfo(
+            result[idx], maxSyncSize, offset);
+        raf.setPositionSync(offset);
+        Uint8List data = raf.readSync(maxSyncSize);
+        Digest sha256Result = sha256.convert(data);
+        if (!(sha256Result.toString() == info.checksum)) {
+          raf.closeSync();
+          raf = file.openSync(mode: FileMode.writeOnlyAppend);
+          raf.setPositionSync(offset);
+          var chunk = await getRemoteChunk(result[idx], maxSyncSize, offset);
+          raf.writeFromSync(chunk.data);
+        }
+        offset += maxSyncSize;
+        isEnd = info.lastChunk;
+        raf.closeSync();
+      }
+      RandomAccessFile raf = file.openSync(mode: FileMode.writeOnlyAppend);
+      raf.truncateSync(remoteFile.size.toInt());
+      raf.close();
     }
   }
 }

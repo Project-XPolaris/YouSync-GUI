@@ -7,7 +7,9 @@ import 'package:yousync/service/client.dart';
 class SyncFolderItem {
   SyncFolder folder;
   bool isSync;
-  SyncFolderItem(this.folder,{this.isSync = false});
+  bool isPull;
+  SyncFolderItem(this.folder,{this.isSync = false,this.isPull = false});
+  SyncFolderStatus? status;
 }
 class HomeProvider extends ChangeNotifier {
   List<SyncFolderItem> folders = [];
@@ -41,10 +43,40 @@ class HomeProvider extends ChangeNotifier {
       return element;
     }).toList();
     notifyListeners();
-    await DefaultSyncClient.syncFolder(folder.localPath, folder.remoteId);
+    await DefaultSyncClient.syncFolder(folder.localPath, folder.remoteId,onRefresh: (status){
+      folders.forEach((element) {
+        if (element.folder.id == folder.id) {
+          element.status = status;
+        }
+      });
+      notifyListeners();
+      print("${status.file.path} - chunk ${status.file.chunk + 1} / ${status.file.totalChunk}");
+    });
     folders = folders.map((element) {
       if (element.folder.id == folder.id) {
         element.isSync = false;
+      }
+      return element;
+    }).toList();
+    folders.forEach((element) {
+      if (element.folder.id == folder.id) {
+        element.status = null;
+      }
+    });
+    notifyListeners();
+  }
+  pull(SyncFolder folder)async {
+    folders = folders.map((element) {
+      if (element.folder.id == folder.id) {
+        element.isPull = true;
+      }
+      return element;
+    }).toList();
+    notifyListeners();
+    await DefaultSyncClient.pull(folder.localPath,folder.remoteId);
+    folders = folders.map((element) {
+      if (element.folder.id == folder.id) {
+        element.isPull = false;
       }
       return element;
     }).toList();
