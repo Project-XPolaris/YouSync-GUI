@@ -9,7 +9,8 @@ class SyncFolderItem {
   bool isSync;
   bool isPull;
   SyncFolderItem(this.folder,{this.isSync = false,this.isPull = false});
-  SyncFolderStatus? status;
+  SyncFolderStatus? syncStatus;
+  PullFolderStatus? pullStatus;
 }
 class HomeProvider extends ChangeNotifier {
   List<SyncFolderItem> folders = [];
@@ -43,27 +44,24 @@ class HomeProvider extends ChangeNotifier {
       return element;
     }).toList();
     notifyListeners();
-    await DefaultSyncClient.syncFolder(folder.localPath, folder.remoteId,onRefresh: (status){
+    try {
+      await DefaultSyncClient.syncFolder(folder.localPath, folder.remoteId,onRefresh: (status){
+        folders.forEach((element) {
+          if (element.folder.id == folder.id) {
+            element.syncStatus = status;
+          }
+        });
+        notifyListeners();
+      });
+    } finally {
       folders.forEach((element) {
         if (element.folder.id == folder.id) {
-          element.status = status;
+          element.isSync = false;
+          element.syncStatus = null;
         }
       });
       notifyListeners();
-      print("${status.file.path} - chunk ${status.file.chunk + 1} / ${status.file.totalChunk}");
-    });
-    folders = folders.map((element) {
-      if (element.folder.id == folder.id) {
-        element.isSync = false;
-      }
-      return element;
-    }).toList();
-    folders.forEach((element) {
-      if (element.folder.id == folder.id) {
-        element.status = null;
-      }
-    });
-    notifyListeners();
+    }
   }
   pull(SyncFolder folder)async {
     folders = folders.map((element) {
@@ -73,13 +71,24 @@ class HomeProvider extends ChangeNotifier {
       return element;
     }).toList();
     notifyListeners();
-    await DefaultSyncClient.pull(folder.localPath,folder.remoteId);
-    folders = folders.map((element) {
-      if (element.folder.id == folder.id) {
-        element.isPull = false;
-      }
-      return element;
-    }).toList();
-    notifyListeners();
+    try {
+      await DefaultSyncClient.pull(folder.localPath,folder.remoteId,onUpdate: (status){
+        folders.forEach((element) {
+          if (element.folder.id == folder.id) {
+            element.pullStatus = status;
+          }
+        });
+        notifyListeners();
+      });
+    }finally {
+      folders = folders.map((element) {
+        if (element.folder.id == folder.id) {
+          element.isPull = false;
+          element.pullStatus = null;
+        }
+        return element;
+      }).toList();
+      notifyListeners();
+    }
   }
 }
