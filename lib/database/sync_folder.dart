@@ -5,8 +5,10 @@ class SyncFolder {
   @PrimaryKey(autoGenerate: true)
   int? id;
 
-  final String localPath;
-  final int remoteId;
+  String localPath;
+  int remoteId;
 
-  SyncFolder(this.id, this.localPath,this.remoteId);
+  bool syncFileList;
+
+  SyncFolder(this.id, this.localPath,this.remoteId,{this.syncFileList = false});
 }

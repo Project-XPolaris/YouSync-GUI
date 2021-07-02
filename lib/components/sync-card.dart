@@ -6,8 +6,9 @@ class SyncCard extends StatelessWidget {
   final Function() onRemove;
   final Function() onSync;
   final Function() onPull;
+  final Function() onClick;
   final SyncFolderItem item;
-  const SyncCard({Key? key,required this.onSync,required this.onRemove,required this.item,required this.onPull}) : super(key: key);
+  const SyncCard({Key? key,required this.onSync,required this.onRemove,required this.item,required this.onPull,required this.onClick}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +99,7 @@ class SyncCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
+            onTap: onClick,
             leading: CircleAvatar(
               backgroundColor: Colors.blue,
               child: Icon(_getIcon(),color: Colors.white,),

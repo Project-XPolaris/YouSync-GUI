@@ -41,6 +41,11 @@ class FileSyncClient extends $grpc.Client {
           '/FileSync/GetRemoteFileChunk',
           ($0.GetRemoteChunkMessage value) => value.writeToBuffer(),
           ($core.List<$core.int> value) => $0.RemoteChunk.fromBuffer(value));
+  static final _$syncFileList =
+      $grpc.ClientMethod<$0.SyncFileListMessage, $0.BaseResponse>(
+          '/FileSync/SyncFileList',
+          ($0.SyncFileListMessage value) => value.writeToBuffer(),
+          ($core.List<$core.int> value) => $0.BaseResponse.fromBuffer(value));
 
   FileSyncClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
@@ -74,6 +79,12 @@ class FileSyncClient extends $grpc.Client {
       $0.GetRemoteChunkMessage request,
       {$grpc.CallOptions? options}) {
     return $createUnaryCall(_$getRemoteFileChunk, request, options: options);
+  }
+
+  $grpc.ResponseFuture<$0.BaseResponse> syncFileList(
+      $0.SyncFileListMessage request,
+      {$grpc.CallOptions? options}) {
+    return $createUnaryCall(_$syncFileList, request, options: options);
   }
 }
 
@@ -120,6 +131,14 @@ abstract class FileSyncServiceBase extends $grpc.Service {
         ($core.List<$core.int> value) =>
             $0.GetRemoteChunkMessage.fromBuffer(value),
         ($0.RemoteChunk value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.SyncFileListMessage, $0.BaseResponse>(
+        'SyncFileList',
+        syncFileList_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) =>
+            $0.SyncFileListMessage.fromBuffer(value),
+        ($0.BaseResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.CheckResult> checkChunk_Pre(
@@ -149,6 +168,11 @@ abstract class FileSyncServiceBase extends $grpc.Service {
     return getRemoteFileChunk(call, await request);
   }
 
+  $async.Future<$0.BaseResponse> syncFileList_Pre($grpc.ServiceCall call,
+      $async.Future<$0.SyncFileListMessage> request) async {
+    return syncFileList(call, await request);
+  }
+
   $async.Future<$0.CheckResult> checkChunk(
       $grpc.ServiceCall call, $0.ChunkInfo request);
   $async.Future<$0.SyncChunkResult> syncFileChunk(
@@ -159,4 +183,6 @@ abstract class FileSyncServiceBase extends $grpc.Service {
       $grpc.ServiceCall call, $0.GetRemoteChunkInfoMessage request);
   $async.Future<$0.RemoteChunk> getRemoteFileChunk(
       $grpc.ServiceCall call, $0.GetRemoteChunkMessage request);
+  $async.Future<$0.BaseResponse> syncFileList(
+      $grpc.ServiceCall call, $0.SyncFileListMessage request);
 }

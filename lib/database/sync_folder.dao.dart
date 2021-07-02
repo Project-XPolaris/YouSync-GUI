@@ -1,5 +1,4 @@
 import 'package:floor/floor.dart';
-import 'package:yousync/api/sync_folder.dart';
 import 'package:yousync/database/sync_folder.dart';
 
 @dao
@@ -15,4 +14,7 @@ abstract class SyncFolderDao {
 
   @delete
   Future<int> deleteSyncFolders(List<SyncFolder> syncFolders);
+
+  @Update(onConflict: OnConflictStrategy.replace)
+  Future<void> updateSyncFolder(SyncFolder syncFolder);
 }

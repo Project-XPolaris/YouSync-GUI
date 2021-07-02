@@ -3,8 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:yousync/components/sync-card.dart';
 import 'package:yousync/config.dart';
 import 'package:yousync/page/create/create.dart';
+import 'package:yousync/page/detail/detail.dart';
 import 'package:yousync/page/home/provider.dart';
-import 'package:path/path.dart';
 import 'package:yousync/page/home/user-bottom-sheet.dart';
 import 'package:yousync/service/client.dart';
 
@@ -27,19 +27,25 @@ class HomePage extends StatelessWidget {
                   child: GestureDetector(
                     child: CircleAvatar(
                       backgroundColor: Colors.blue.shade800,
-                      child: Icon(Icons.person,color: Colors.white,),
+                      child: Icon(
+                        Icons.person,
+                        color: Colors.white,
+                      ),
                     ),
-                    onTap: (){
-                      showModalBottomSheet(context: context, builder: (BuildContext context) {
-                        return UserBottomSheet(
-                          onReconnect: (){
-                            var url = ApplicationConfig().serviceUrl;
-                            if (url != null) {
-                              DefaultSyncClient.connect(url);
-                            }
+                    onTap: () {
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return UserBottomSheet(
+                              onReconnect: () {
+                                var url = ApplicationConfig().serviceUrl;
+                                if (url != null) {
+                                  DefaultSyncClient.connect(url);
+                                }
+                              },
+                            );
                           },
-                        );
-                      },backgroundColor: Colors.transparent);
+                          backgroundColor: Colors.transparent);
                     },
                   ),
                 )
@@ -59,8 +65,20 @@ class HomePage extends StatelessWidget {
                       onRemove: () {
                         provider.removeSyncFolder(e.folder);
                       },
-                      onPull: (){
+                      onPull: () {
                         provider.pull(e.folder);
+                      },
+                      onClick: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => DetailPage(
+                                    folder: e.folder,
+                                    onUpdate: () {
+                                      provider.refresh(force: true);
+                                    },
+                                  )),
+                        );
                       },
                       item: e);
                 }).toList(),

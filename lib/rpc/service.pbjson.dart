@@ -8,6 +8,16 @@
 import 'dart:core' as $core;
 import 'dart:convert' as $convert;
 import 'dart:typed_data' as $typed_data;
+@$core.Deprecated('Use baseResponseDescriptor instead')
+const BaseResponse$json = const {
+  '1': 'BaseResponse',
+  '2': const [
+    const {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+  ],
+};
+
+/// Descriptor for `BaseResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List baseResponseDescriptor = $convert.base64Decode('CgxCYXNlUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2Vzcw==');
 @$core.Deprecated('Use chunkInfoDescriptor instead')
 const ChunkInfo$json = const {
   '1': 'ChunkInfo',
@@ -138,3 +148,25 @@ const RemoteChunk$json = const {
 
 /// Descriptor for `RemoteChunk`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List remoteChunkDescriptor = $convert.base64Decode('CgtSZW1vdGVDaHVuaxISCgRkYXRhGAEgASgMUgRkYXRh');
+@$core.Deprecated('Use syncFileItemDescriptor instead')
+const SyncFileItem$json = const {
+  '1': 'SyncFileItem',
+  '2': const [
+    const {'1': 'path', '3': 1, '4': 1, '5': 9, '10': 'path'},
+  ],
+};
+
+/// Descriptor for `SyncFileItem`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List syncFileItemDescriptor = $convert.base64Decode('CgxTeW5jRmlsZUl0ZW0SEgoEcGF0aBgBIAEoCVIEcGF0aA==');
+@$core.Deprecated('Use syncFileListMessageDescriptor instead')
+const SyncFileListMessage$json = const {
+  '1': 'SyncFileListMessage',
+  '2': const [
+    const {'1': 'folder', '3': 1, '4': 3, '5': 11, '6': '.SyncFileItem', '10': 'folder'},
+    const {'1': 'file', '3': 2, '4': 3, '5': 11, '6': '.SyncFileItem', '10': 'file'},
+    const {'1': 'folderId', '3': 3, '4': 1, '5': 4, '10': 'folderId'},
+  ],
+};
+
+/// Descriptor for `SyncFileListMessage`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List syncFileListMessageDescriptor = $convert.base64Decode('ChNTeW5jRmlsZUxpc3RNZXNzYWdlEiUKBmZvbGRlchgBIAMoCzINLlN5bmNGaWxlSXRlbVIGZm9sZGVyEiEKBGZpbGUYAiADKAsyDS5TeW5jRmlsZUl0ZW1SBGZpbGUSGgoIZm9sZGVySWQYAyABKARSCGZvbGRlcklk');

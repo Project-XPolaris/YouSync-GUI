@@ -81,7 +81,7 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `SyncFolder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `localPath` TEXT NOT NULL, `remoteId` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `SyncFolder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `localPath` TEXT NOT NULL, `remoteId` INTEGER NOT NULL, `syncFileList` INTEGER NOT NULL)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -104,7 +104,18 @@ class _$SyncFolderDao extends SyncFolderDao {
             (SyncFolder item) => <String, Object?>{
                   'id': item.id,
                   'localPath': item.localPath,
-                  'remoteId': item.remoteId
+                  'remoteId': item.remoteId,
+                  'syncFileList': item.syncFileList ? 1 : 0
+                }),
+        _syncFolderUpdateAdapter = UpdateAdapter(
+            database,
+            'SyncFolder',
+            ['id'],
+            (SyncFolder item) => <String, Object?>{
+                  'id': item.id,
+                  'localPath': item.localPath,
+                  'remoteId': item.remoteId,
+                  'syncFileList': item.syncFileList ? 1 : 0
                 }),
         _syncFolderDeletionAdapter = DeletionAdapter(
             database,
@@ -113,7 +124,8 @@ class _$SyncFolderDao extends SyncFolderDao {
             (SyncFolder item) => <String, Object?>{
                   'id': item.id,
                   'localPath': item.localPath,
-                  'remoteId': item.remoteId
+                  'remoteId': item.remoteId,
+                  'syncFileList': item.syncFileList ? 1 : 0
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -124,18 +136,27 @@ class _$SyncFolderDao extends SyncFolderDao {
 
   final InsertionAdapter<SyncFolder> _syncFolderInsertionAdapter;
 
+  final UpdateAdapter<SyncFolder> _syncFolderUpdateAdapter;
+
   final DeletionAdapter<SyncFolder> _syncFolderDeletionAdapter;
 
   @override
   Future<List<SyncFolder>> findAllSyncFolders() async {
     return _queryAdapter.queryList('SELECT * FROM SyncFolder',
         mapper: (Map<String, Object?> row) => SyncFolder(row['id'] as int?,
-            row['localPath'] as String, row['remoteId'] as int));
+            row['localPath'] as String, row['remoteId'] as int,
+            syncFileList: (row['syncFileList'] as int) != 0));
   }
 
   @override
   Future<void> insertSyncFolder(SyncFolder folder) async {
     await _syncFolderInsertionAdapter.insert(folder, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateSyncFolder(SyncFolder syncFolder) async {
+    await _syncFolderUpdateAdapter.update(
+        syncFolder, OnConflictStrategy.replace);
   }
 
   @override

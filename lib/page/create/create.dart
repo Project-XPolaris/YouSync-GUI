@@ -58,6 +58,7 @@ class _CreateSyncDirectoryState extends State<CreateSyncDirectory> {
                             onPressed: () {
                               if (provider.step == 2) {
                                 provider.createSync();
+                                Navigator.of(context).pop();
                                 return;
                               }
                               provider.nextStep();

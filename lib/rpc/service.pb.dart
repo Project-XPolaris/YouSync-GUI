@@ -10,6 +10,53 @@ import 'dart:core' as $core;
 import 'package:fixnum/fixnum.dart' as $fixnum;
 import 'package:protobuf/protobuf.dart' as $pb;
 
+class BaseResponse extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'BaseResponse', createEmptyInstance: create)
+    ..aOB(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'success')
+    ..hasRequiredFields = false
+  ;
+
+  BaseResponse._() : super();
+  factory BaseResponse({
+    $core.bool? success,
+  }) {
+    final _result = create();
+    if (success != null) {
+      _result.success = success;
+    }
+    return _result;
+  }
+  factory BaseResponse.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory BaseResponse.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  BaseResponse clone() => BaseResponse()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  BaseResponse copyWith(void Function(BaseResponse) updates) => super.copyWith((message) => updates(message as BaseResponse)) as BaseResponse; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static BaseResponse create() => BaseResponse._();
+  BaseResponse createEmptyInstance() => create();
+  static $pb.PbList<BaseResponse> createRepeated() => $pb.PbList<BaseResponse>();
+  @$core.pragma('dart2js:noInline')
+  static BaseResponse getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BaseResponse>(create);
+  static BaseResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool v) { $_setBool(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => clearField(1);
+}
+
 class ChunkInfo extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'ChunkInfo', createEmptyInstance: create)
     ..a<$fixnum.Int64>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'index', $pb.PbFieldType.OU6, defaultOrMaker: $fixnum.Int64.ZERO)
@@ -799,5 +846,115 @@ class RemoteChunk extends $pb.GeneratedMessage {
   $core.bool hasData() => $_has(0);
   @$pb.TagNumber(1)
   void clearData() => clearField(1);
+}
+
+class SyncFileItem extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SyncFileItem', createEmptyInstance: create)
+    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'path')
+    ..hasRequiredFields = false
+  ;
+
+  SyncFileItem._() : super();
+  factory SyncFileItem({
+    $core.String? path,
+  }) {
+    final _result = create();
+    if (path != null) {
+      _result.path = path;
+    }
+    return _result;
+  }
+  factory SyncFileItem.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SyncFileItem.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SyncFileItem clone() => SyncFileItem()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SyncFileItem copyWith(void Function(SyncFileItem) updates) => super.copyWith((message) => updates(message as SyncFileItem)) as SyncFileItem; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SyncFileItem create() => SyncFileItem._();
+  SyncFileItem createEmptyInstance() => create();
+  static $pb.PbList<SyncFileItem> createRepeated() => $pb.PbList<SyncFileItem>();
+  @$core.pragma('dart2js:noInline')
+  static SyncFileItem getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SyncFileItem>(create);
+  static SyncFileItem? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get path => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set path($core.String v) { $_setString(0, v); }
+  @$pb.TagNumber(1)
+  $core.bool hasPath() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPath() => clearField(1);
+}
+
+class SyncFileListMessage extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'SyncFileListMessage', createEmptyInstance: create)
+    ..pc<SyncFileItem>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'folder', $pb.PbFieldType.PM, subBuilder: SyncFileItem.create)
+    ..pc<SyncFileItem>(2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'file', $pb.PbFieldType.PM, subBuilder: SyncFileItem.create)
+    ..a<$fixnum.Int64>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'folderId', $pb.PbFieldType.OU6, protoName: 'folderId', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false
+  ;
+
+  SyncFileListMessage._() : super();
+  factory SyncFileListMessage({
+    $core.Iterable<SyncFileItem>? folder,
+    $core.Iterable<SyncFileItem>? file,
+    $fixnum.Int64? folderId,
+  }) {
+    final _result = create();
+    if (folder != null) {
+      _result.folder.addAll(folder);
+    }
+    if (file != null) {
+      _result.file.addAll(file);
+    }
+    if (folderId != null) {
+      _result.folderId = folderId;
+    }
+    return _result;
+  }
+  factory SyncFileListMessage.fromBuffer($core.List<$core.int> i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromBuffer(i, r);
+  factory SyncFileListMessage.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+  'Will be removed in next major version')
+  SyncFileListMessage clone() => SyncFileListMessage()..mergeFromMessage(this);
+  @$core.Deprecated(
+  'Using this can add significant overhead to your binary. '
+  'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+  'Will be removed in next major version')
+  SyncFileListMessage copyWith(void Function(SyncFileListMessage) updates) => super.copyWith((message) => updates(message as SyncFileListMessage)) as SyncFileListMessage; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SyncFileListMessage create() => SyncFileListMessage._();
+  SyncFileListMessage createEmptyInstance() => create();
+  static $pb.PbList<SyncFileListMessage> createRepeated() => $pb.PbList<SyncFileListMessage>();
+  @$core.pragma('dart2js:noInline')
+  static SyncFileListMessage getDefault() => _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SyncFileListMessage>(create);
+  static SyncFileListMessage? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<SyncFileItem> get folder => $_getList(0);
+
+  @$pb.TagNumber(2)
+  $core.List<SyncFileItem> get file => $_getList(1);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get folderId => $_getI64(2);
+  @$pb.TagNumber(3)
+  set folderId($fixnum.Int64 v) { $_setInt64(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasFolderId() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFolderId() => clearField(3);
 }
 

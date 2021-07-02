@@ -53,6 +53,9 @@ class HomeProvider extends ChangeNotifier {
         });
         notifyListeners();
       });
+      if (folder.syncFileList) {
+        await DefaultSyncClient.syncFileList(folder.localPath, folder.remoteId);
+      }
     } finally {
       folders.forEach((element) {
         if (element.folder.id == folder.id) {

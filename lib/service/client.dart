@@ -228,4 +228,27 @@ class SyncClient {
       raf.close();
     }
   }
+
+  Future syncFileList(String directoryPath, int folderId) async {
+    var instance = stub;
+    if (instance == null) {
+      throw Exception("client not connect");
+    }
+    List<SyncFileItem> folders = [];
+    List<SyncFileItem> files = [];
+    Directory dir = new Directory(directoryPath);
+    await for (var item in dir.list(recursive: true)) {
+      var relPath = item.path.replaceAll(directoryPath, "");
+      if (item.statSync().type == FileSystemEntityType.directory) {
+        folders.add(SyncFileItem(path: relPath));
+      }
+      if (item.statSync().type == FileSystemEntityType.file) {
+        files.add(SyncFileItem(path: relPath));
+      }
+    }
+    await instance.syncFileList(SyncFileListMessage(
+        file: files,
+        folder: folders,
+        folderId: fixnum.Int64.parseInt(folderId.toString())));
+  }
 }
