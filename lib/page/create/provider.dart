@@ -8,6 +8,9 @@ import 'package:yousync/database/sync_folder.dao.dart';
 import 'package:yousync/database/sync_folder.dart';
 
 class CreateProvider extends ChangeNotifier {
+  CreateProvider({initRemotePath}){
+    remotePath = initRemotePath;
+  }
   int MAX_STEP = 2;
   int step = 0;
   String? localPath;

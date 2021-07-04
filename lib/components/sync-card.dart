@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:yousync/page/home/provider.dart';
+import 'package:yousync/page/home/tabs/index/provider.dart';
 import 'package:path/path.dart';
 
 class SyncCard extends StatelessWidget {

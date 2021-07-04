@@ -3,14 +3,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import 'package:yousync/api/client.dart';
+import 'package:yousync/api/read_dir_response.dart';
 
-class LocalDirectoryPicker extends StatefulWidget {
+class RemoteDirectoryPicker extends StatefulWidget {
   final Function onPick;
   final String? initPath;
-  const LocalDirectoryPicker({Key? key,required this.onPick,this.initPath}) : super(key: key);
+  const RemoteDirectoryPicker({Key? key,required this.onPick,this.initPath}) : super(key: key);
 
   @override
-  _LocalDirectoryPickerState createState() => _LocalDirectoryPickerState();
+  _RemoteDirectoryPickerState createState() => _RemoteDirectoryPickerState();
 }
 
 class DirectoryItem {
@@ -20,47 +22,36 @@ class DirectoryItem {
   DirectoryItem({required this.path, required this.name});
 }
 
-class _LocalDirectoryPickerState extends State<LocalDirectoryPicker> {
+class _RemoteDirectoryPickerState extends State<RemoteDirectoryPicker> {
   List<DirectoryItem> _dirItems = [];
   String pathInput = "";
-  String backPath = "";
+  String? backPath = "";
   var _inputPathController = TextEditingController();
 
-  _refreshPathItem(String readPath) async {
-    _inputPathController.text = readPath;
-    var dir = Directory(readPath);
 
-    var items = dir.listSync().where(
-        (element) => element.statSync().type == FileSystemEntityType.directory);
+  _refreshPathItem(String readPath) async {
+    ReadDirResponse readDirResponse = await ApiClient().readRemoteDir(readPath);
+    _inputPathController.text = readPath;
     setState(() {
-      _dirItems = items
+      _dirItems = (readDirResponse.files ?? []).where((element) => element.type == "Directory").map((e) => DirectoryItem(path: e.path ?? "", name: e.name ?? "")).toList()
           .map((e) => DirectoryItem(path: e.path, name: basename(e.path)))
           .toList();
+      backPath = readDirResponse.back;
       pathInput = readPath;
-      backPath = dir.parent.path;
     });
   }
 
   _init() async {
-    var initDir = await getApplicationDocumentsDirectory();
-    var initPath = widget.initPath;
-    if (initPath != null) {
-      initDir = Directory(initPath);
-    }
-    if (Platform.isAndroid) {
-      initDir = new Directory("/storage/emulated/0");
-    }
     setState(() {
-      pathInput = initDir.path;
+      pathInput = "/";
     });
-    _refreshPathItem(initDir.path);
+    _refreshPathItem("/");
   }
 
   @override
   void initState() {
     _init();
   }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -73,7 +64,9 @@ class _LocalDirectoryPickerState extends State<LocalDirectoryPicker> {
               children: [
                 IconButton(
                     onPressed: () {
-                      _refreshPathItem(backPath);
+                      if (backPath != null) {
+                        _refreshPathItem(backPath!);
+                      }
                     },
                     icon: Icon(Icons.arrow_back)),
                 Expanded(

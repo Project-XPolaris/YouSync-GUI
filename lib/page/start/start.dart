@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:yousync/api/client.dart';
 import 'package:yousync/api/service_info_response.dart';
+import 'package:yousync/api/user_auth.dart';
+import 'package:yousync/api/user_token.dart';
 import 'package:yousync/config.dart';
 import 'package:yousync/page/home/home.dart';
 import 'package:yousync/service/client.dart';
@@ -27,34 +30,61 @@ class _StartPageState extends State<StartPage> {
   @override
   Widget build(BuildContext context) {
     _onFinishClick() async {
-      String requestUrl = "http://$inputUrl:4300/info";
-      Dio dio = new Dio();
-      var response = await dio.get(requestUrl);
-      ServiceInfoResponse info = ServiceInfoResponse.fromJson(response.data);
-      if (!info.success) {
+      ApplicationConfig().serviceUrl = inputUrl;
+      try {
+        ServiceInfoResponse info =  await ApiClient().fetchServiceInfo();
+        if (!info.success) {
+          return;
+        }
+        if (info.auth) {
+          if (inputUsername.isEmpty || inputPassword.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Service need auth")));
+            return;
+          }
+          UserAuth userAuth = await ApiClient().userAuth(inputUsername, inputPassword);
+          LoginHistoryManager().add(LoginHistory(apiUrl: inputUrl, username: inputUsername, token: userAuth.token));
+          ApplicationConfig().token = userAuth.token;
+          ApplicationConfig().username = inputUsername;
+        }else{
+          LoginHistoryManager().add(LoginHistory(apiUrl: inputUrl, username: "Public", token: ""));
+        }
+
+      } on DioError catch(e) {
+        print(e);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: ${e.response?.data["reason"]}")));
         return;
       }
-      LoginHistoryManager().add(LoginHistory(apiUrl: inputUrl, username: "Public", token: ""));
-      ApplicationConfig().serviceUrl = inputUrl;
       DefaultSyncClient.connect(inputUrl);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomePage()));
     }
 
     _onHistoryClick(LoginHistory history) async {
-      var config = ApplicationConfig();
-      Dio dio = new Dio();
-      String requestUrl = "http://${history.apiUrl}:4300/info";
+      ApplicationConfig().serviceUrl = history.apiUrl;
       try {
-        var response = await dio.get(requestUrl);
-        ServiceInfoResponse info = ServiceInfoResponse.fromJson(response.data);
+        ServiceInfoResponse info =  await ApiClient().fetchServiceInfo();
         if (!info.success) {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to connect host")));
           return;
         }
+        if (info.auth) {
+          if (history.token.length == 0) {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("token is empty,try to login again")));
+            return;
+          }
+          UserToken token = await ApiClient().userToken(history.token);
+          if (!token.success){
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("token is empty,try to login again")));
+            return;
+          }
+          ApplicationConfig().token = history.token;
+          ApplicationConfig().username = history.username;
+        }
+
       } on DioError catch(e) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: ${e.response?.data["reason"]}")));
         return;
       }
-      config.serviceUrl = history.apiUrl;
       DefaultSyncClient.connect(history.apiUrl);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomePage()));
@@ -68,7 +98,7 @@ class _StartPageState extends State<StartPage> {
         onPressed: () {
           _onFinishClick();
         },
-        child: Icon(Icons.chevron_right),
+        child: Icon(Icons.chevron_right,color: Colors.white,),
       ),
       body: FutureBuilder(
           future: _init(),
@@ -106,6 +136,7 @@ class _StartPageState extends State<StartPage> {
                               width: 240,
                               margin: EdgeInsets.only(bottom: 16),
                               child: TabBar(
+                                labelColor: Colors.black87,
                                 indicatorColor: Colors.blue,
                                 tabs: [
                                   Tab(
@@ -148,13 +179,31 @@ class _StartPageState extends State<StartPage> {
                                     TextField(
                                       cursorColor: Colors.blue,
                                       decoration: InputDecoration(
-                                          border: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                  color: Colors.blue)),
                                           hintText: 'Service URL'),
                                       onChanged: (text) {
                                         setState(() {
                                           inputUrl = text;
+                                        });
+                                      },
+                                    ),
+                                    TextField(
+                                      cursorColor: Colors.blue,
+                                      decoration: InputDecoration(
+                                          hintText: 'username'),
+                                      onChanged: (text) {
+                                        setState(() {
+                                          inputUsername = text;
+                                        });
+                                      },
+                                    ),
+                                    TextField(
+                                      cursorColor: Colors.blue,
+                                      obscureText: true,
+                                      decoration: InputDecoration(
+                                          hintText: 'password'),
+                                      onChanged: (text) {
+                                        setState(() {
+                                          inputPassword = text;
                                         });
                                       },
                                     ),

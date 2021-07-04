@@ -31,7 +31,7 @@ class _UserBottomSheetState extends State<UserBottomSheet> {
                       leading: CircleAvatar(
                         child: Icon(Icons.person),
                       ),
-                      title: Text("My"),
+                      title: Text(ApplicationConfig().username ?? ""),
                     ),
                     padding: EdgeInsets.all(16),
                   ),

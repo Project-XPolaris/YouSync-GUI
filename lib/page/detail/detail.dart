@@ -66,7 +66,7 @@ class _DetailPageState extends State<DetailPage> {
                 ListTile(
                   leading: Icon(Icons.sync),
                   title:
-                      Text(provider.folder.syncFileList ? "Enable" : "Disable"),
+                      Text("Full sync"),
                   subtitle: Text(
                       "remove if remote exist but not local,remove file or directory"),
                   trailing: Switch(
