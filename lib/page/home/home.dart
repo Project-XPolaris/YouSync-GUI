@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:yousync/components/sync-card.dart';
 import 'package:yousync/config.dart';
+import 'package:yousync/layout/title.dart';
 import 'package:yousync/page/create/create.dart';
 import 'package:yousync/page/detail/detail.dart';
 import 'package:yousync/page/home/tabs/index/index.dart';
@@ -21,32 +22,34 @@ class _HomePageState extends State<HomePage> {
   int tabIndex = 0;
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider<HomeProvider>(
-        create: (_) => HomeProvider(),
-        child: Consumer<HomeProvider>(builder: (context, provider, child) {
-          provider.refresh();
-          return Scaffold(
-            backgroundColor: Colors.white,
-            body: IndexedStack(
-              index: tabIndex,
-              children: [
-                IndexPage(),
-                RemoteListPage()
-              ],
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-              currentIndex: tabIndex,
-              onTap: (index){
-                setState(() {
-                  tabIndex = index;
-                });
-              },
-              items: [
-                BottomNavigationBarItem(icon: Icon(Icons.folder),label: "Local"),
-                BottomNavigationBarItem(icon: Icon(Icons.cloud),label: "Remote")
-              ],
-            ),
-          );
-        }));
+    return TitleBar(
+      child: ChangeNotifierProvider<HomeProvider>(
+          create: (_) => HomeProvider(),
+          child: Consumer<HomeProvider>(builder: (context, provider, child) {
+            provider.refresh();
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: IndexedStack(
+                index: tabIndex,
+                children: [
+                  IndexPage(),
+                  RemoteListPage()
+                ],
+              ),
+              bottomNavigationBar: BottomNavigationBar(
+                currentIndex: tabIndex,
+                onTap: (index){
+                  setState(() {
+                    tabIndex = index;
+                  });
+                },
+                items: [
+                  BottomNavigationBarItem(icon: Icon(Icons.folder),label: "Local"),
+                  BottomNavigationBarItem(icon: Icon(Icons.cloud),label: "Remote")
+                ],
+              ),
+            );
+          })),
+    );
   }
 }

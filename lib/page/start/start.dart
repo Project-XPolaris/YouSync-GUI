@@ -5,6 +5,7 @@ import 'package:yousync/api/service_info_response.dart';
 import 'package:yousync/api/user_auth.dart';
 import 'package:yousync/api/user_token.dart';
 import 'package:yousync/config.dart';
+import 'package:yousync/layout/title.dart';
 import 'package:yousync/page/home/home.dart';
 import 'package:yousync/service/client.dart';
 import 'package:yousync/utils/login_history.dart';
@@ -47,6 +48,7 @@ class _StartPageState extends State<StartPage> {
           ApplicationConfig().username = inputUsername;
         }else{
           LoginHistoryManager().add(LoginHistory(apiUrl: inputUrl, username: "Public", token: ""));
+          ApplicationConfig().username = "Public";
         }
 
       } on DioError catch(e) {
@@ -77,9 +79,10 @@ class _StartPageState extends State<StartPage> {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("token is empty,try to login again")));
             return;
           }
-          ApplicationConfig().token = history.token;
-          ApplicationConfig().username = history.username;
+
         }
+        ApplicationConfig().token = history.token;
+        ApplicationConfig().username = history.username;
 
       } on DioError catch(e) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login failed: ${e.response?.data["reason"]}")));
@@ -89,138 +92,142 @@ class _StartPageState extends State<StartPage> {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomePage()));
     }
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _onFinishClick();
-        },
-        child: Icon(Icons.chevron_right,color: Colors.white,),
-      ),
-      body: FutureBuilder(
-          future: _init(),
-          builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-            if (snapshot.hasData) {
-              return Container(
-                child: Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(),
-                        child: Text(
-                          "YouSync",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontSize: 48,
+    return TitleBar(
+      color: Colors.transparent,
+      isLight: true,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            _onFinishClick();
+          },
+          child: Icon(Icons.chevron_right,color: Colors.white,),
+        ),
+        body: FutureBuilder(
+            future: _init(),
+            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+              if (snapshot.hasData) {
+                return Container(
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(),
+                          child: Text(
+                            "YouSync",
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontSize: 48,
+                            ),
                           ),
                         ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(bottom: 64),
-                        child: Text(
-                          "from ProjectXPolaris",
-                          style: TextStyle(color: Colors.black54, fontSize: 12),
+                        Container(
+                          margin: EdgeInsets.only(bottom: 64),
+                          child: Text(
+                            "from ProjectXPolaris",
+                            style: TextStyle(color: Colors.black54, fontSize: 12),
+                          ),
                         ),
-                      ),
-                      Expanded(
-                          child: DefaultTabController(
-                        length: 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 240,
-                              margin: EdgeInsets.only(bottom: 16),
-                              child: TabBar(
-                                labelColor: Colors.black87,
-                                indicatorColor: Colors.blue,
-                                tabs: [
-                                  Tab(
-                                    text: "History",
-                                  ),
-                                  Tab(
-                                    text: "New login",
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Expanded(
-                                child: TabBarView(
-                              physics: BouncingScrollPhysics(),
-                              children: [
-                                ListView(
-                                  children:
-                                      LoginHistoryManager().list.map((history) {
-                                    return Container(
-                                      margin: EdgeInsets.only(bottom: 8),
-                                      child: ListTile(
-                                        onTap: () {
-                                          _onHistoryClick(history);
-                                        },
-                                        leading: CircleAvatar(
-                                          backgroundColor: Colors.blue,
-                                          child: Icon(
-                                            Icons.person,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        title: Text(history.username),
-                                        subtitle: Text(history.apiUrl),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                                ListView(
-                                  children: [
-                                    TextField(
-                                      cursorColor: Colors.blue,
-                                      decoration: InputDecoration(
-                                          hintText: 'Service URL'),
-                                      onChanged: (text) {
-                                        setState(() {
-                                          inputUrl = text;
-                                        });
-                                      },
+                        Expanded(
+                            child: DefaultTabController(
+                          length: 2,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 240,
+                                margin: EdgeInsets.only(bottom: 16),
+                                child: TabBar(
+                                  labelColor: Colors.black87,
+                                  indicatorColor: Colors.blue,
+                                  tabs: [
+                                    Tab(
+                                      text: "History",
                                     ),
-                                    TextField(
-                                      cursorColor: Colors.blue,
-                                      decoration: InputDecoration(
-                                          hintText: 'username'),
-                                      onChanged: (text) {
-                                        setState(() {
-                                          inputUsername = text;
-                                        });
-                                      },
-                                    ),
-                                    TextField(
-                                      cursorColor: Colors.blue,
-                                      obscureText: true,
-                                      decoration: InputDecoration(
-                                          hintText: 'password'),
-                                      onChanged: (text) {
-                                        setState(() {
-                                          inputPassword = text;
-                                        });
-                                      },
+                                    Tab(
+                                      text: "New login",
                                     ),
                                   ],
-                                )
-                              ],
-                            ))
-                          ],
-                        ),
-                      )),
-                    ],
+                                ),
+                              ),
+                              Expanded(
+                                  child: TabBarView(
+                                physics: BouncingScrollPhysics(),
+                                children: [
+                                  ListView(
+                                    children:
+                                        LoginHistoryManager().list.map((history) {
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: 8),
+                                        child: ListTile(
+                                          onTap: () {
+                                            _onHistoryClick(history);
+                                          },
+                                          leading: CircleAvatar(
+                                            backgroundColor: Colors.blue,
+                                            child: Icon(
+                                              Icons.person,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          title: Text(history.username),
+                                          subtitle: Text(history.apiUrl),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                  ListView(
+                                    children: [
+                                      TextField(
+                                        cursorColor: Colors.blue,
+                                        decoration: InputDecoration(
+                                            hintText: 'Service URL'),
+                                        onChanged: (text) {
+                                          setState(() {
+                                            inputUrl = text;
+                                          });
+                                        },
+                                      ),
+                                      TextField(
+                                        cursorColor: Colors.blue,
+                                        decoration: InputDecoration(
+                                            hintText: 'username'),
+                                        onChanged: (text) {
+                                          setState(() {
+                                            inputUsername = text;
+                                          });
+                                        },
+                                      ),
+                                      TextField(
+                                        cursorColor: Colors.blue,
+                                        obscureText: true,
+                                        decoration: InputDecoration(
+                                            hintText: 'password'),
+                                        onChanged: (text) {
+                                          setState(() {
+                                            inputPassword = text;
+                                          });
+                                        },
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ))
+                            ],
+                          ),
+                        )),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            }
-            return Container();
-          }),
+                );
+              }
+              return Container();
+            }),
+      ),
     );
   }
 }

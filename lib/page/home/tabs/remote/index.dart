@@ -21,6 +21,7 @@ class _RemoteListPageState extends State<RemoteListPage> {
     child: Consumer<RemoteListProvider>(builder: (context, provider, child) {
       provider.refresh();
       return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: Text("Remote folders"),
           actions: [
